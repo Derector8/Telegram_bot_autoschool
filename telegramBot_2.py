@@ -5,8 +5,6 @@ from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     InputMediaPhoto,
-    ReplyKeyboardRemove,
-    ReplyKeyboardMarkup
 )
 from telegram.ext import (
     Updater,
@@ -299,30 +297,18 @@ def ol(update: Update, context: CallbackContext):
 
 def photo(update: Update, context: CallbackContext):
     """"""
-    photo_file = update.message.photo[-1].get_file()
-    photo_file.download('user_photo.jpg')
-    logger.info("Photo: %s", 'user_photo.jpg')
     context.user_data['photo'] = update.message.photo[-1]['file_id']
     update.message.reply_text(
         'Первое фото сохранено. Теперь отправьте второе фото(разворот с пропиской:'
     )
-    print(update.message)
-    print(update.message.photo[-1]['file_id'])
-    #context.bot.send_media_group(chat_id=336518017, media=update.message)
-    #context.bot.send_photo(chat_id=336518017, photo=open('user_photo.jpg','rb'))
+
     return PHOTO2
 
 def photo2(update: Update, context: CallbackContext):
-    print(update.message.photo[-1]['file_id'])
     context.user_data['photo2'] = update.message.photo[-1]['file_id']
     update.message.reply_text(
         'Второе фото сохранено'
     )
-    #context.bot.send_message(chat_id=ms_chat_id,
-    #                         text=f'ФИО:{context.user_data["fio_ms"]}\nКатегории:{context.user_data["Categorii"]}\n{context.user_data["Ol"]}')
-    #context.bot.send_photo(chat_id=ms_chat_id,
-                           #photo=context.user_data['photo'])
-    #context.bot.send_photo(chat_id=ms_chat_id, photo=context.user_data['photo2'])
     list_of_urls = [
         context.user_data['photo'],
         context.user_data['photo2'],
@@ -355,7 +341,7 @@ def unknown(update: Update, context: CallbackContext):
 
 def main():
     updater = Updater(token=TOKEN, use_context=True)
-    print("Соединение с телеграмм установлено! Запуск бота:")
+    print("Соединение с телеграмм установлено! Запуск бота")
     dispatcher = updater.dispatcher
 
     # Добавление хэндлеров и диспетчера
