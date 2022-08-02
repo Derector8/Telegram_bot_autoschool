@@ -323,15 +323,6 @@ def photo2(update: Update, context: CallbackContext):
     )
     return ConversationHandler.END
 
-def ms_end(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=ms_chat_id,
-                             text=f'ФИО:{context.user_data["fio_ms"]}\nКатегории:{context.user_data["Categorii"]}\n{context.user_data["Ol"]}')
-    context.bot.send_photo(chat_id=ms_chat_id,
-                           photo='AgACAgIAAxkBAAIDwWLpcBgmgnyIaC7w2laZURD3nrfCAALSvDEbXpZRSxLb865Tayl2AQADAgADeQADKQQ')
-    context.bot.send_photo(chat_id=ms_chat_id, photo=update.message.photo[-1])
-    return ConversationHandler.END
-
-
 
 def unknown(update: Update, context: CallbackContext):
     """Функция для всех других сообщений и команд, которые бот не знает"""
