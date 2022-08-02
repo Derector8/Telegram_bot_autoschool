@@ -4,6 +4,7 @@ from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    InputMediaPhoto,
     ReplyKeyboardRemove,
     ReplyKeyboardMarkup
 )
@@ -36,7 +37,7 @@ Instructor, Uchenik, Grupa = range(3)
 FIO, NUMBER = range(2)
 teoria,vozdenie = 'teoria', 'vozdenie'
 CHANGE, NOMER_UCHENIKA, WHAT, FIO_ADD, NUMBER_ADD = range(5)
-
+FIO_MS, CATEGORII, OL, PHOTO, PHOTO2 = range(5)
 
 
 # Команды и функции бота
@@ -237,6 +238,115 @@ def number_to_base(update, context: CallbackContext):
     return ConversationHandler.END
 
 
+
+def ms(update: Update, _):
+    update.message.reply_text('Если хотите отменить подачу введите команду /cancel. \n\n'
+                              'Введите Фамилию Имя Отчество ученика: ')
+    return FIO_MS
+
+def fio_ms(update: Update, context: CallbackContext):
+    context.user_data['fio_ms'] = update.message.text
+    logger.info("ФИО ученика: %s", update.message.text)
+    button1 = [InlineKeyboardButton("B,M,B1", callback_data='B')]
+    button2 = [InlineKeyboardButton("A,M,A1", callback_data='A')]
+    button3 = [InlineKeyboardButton("A,B,M,A1,B1", callback_data='AB')]
+
+    reply_markup = InlineKeyboardMarkup([button1, button2, button3])
+
+    update.message.reply_text(
+        "Если хотите отменить изменение введите команду /cancel. \n\n"
+        "Какие категории:",
+        reply_markup=reply_markup
+    )
+    return CATEGORII
+
+def categorii(update: Update, context: CallbackContext):
+    """Функция начала беседы бота для изменения данных в базе учеников """
+    query = update.callback_query
+    query.answer()
+    choice = query.data
+    # Now u can define what choice ("callback_data") do what like this:
+    if choice == 'A':
+        context.user_data['Categorii'] = 'A,M,A1'
+
+    if choice == 'B':
+        context.user_data['Categorii'] = 'B,M,B1'
+
+    if choice == 'AB':
+        context.user_data['Categorii'] = 'A,B,M,A1,B1'
+    logger.info("Категории ученика: %s", context.user_data['Categorii'])
+
+    button1 = [InlineKeyboardButton("Носит", callback_data='Yes')]
+    button2 = [InlineKeyboardButton("Не носит", callback_data='No')]
+
+    reply_markup = InlineKeyboardMarkup([button1, button2])
+    query.edit_message_text(text='Носит ли ученик очки/линзы? ', reply_markup=reply_markup)
+
+    return OL
+
+def ol(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+    choice = query.data
+    # Now u can define what choice ("callback_data") do what like this:
+    if choice == 'Yes':
+        context.user_data['Ol'] = 'О/л'
+
+    if choice == 'No':
+        context.user_data['Ol'] = 'Б/о'
+    query.edit_message_text(text='Последний шаг - прикрепите фото паспорта по одному фото за раз(сначала главный разворот): ')
+    return PHOTO
+
+def photo(update: Update, context: CallbackContext):
+    """"""
+    photo_file = update.message.photo[-1].get_file()
+    photo_file.download('user_photo.jpg')
+    logger.info("Photo: %s", 'user_photo.jpg')
+    context.user_data['photo'] = update.message.photo[-1]['file_id']
+    update.message.reply_text(
+        'Первое фото сохранено. Теперь отправьте второе фото(разворот с пропиской:'
+    )
+    print(update.message)
+    print(update.message.photo[-1]['file_id'])
+    #context.bot.send_media_group(chat_id=336518017, media=update.message)
+    #context.bot.send_photo(chat_id=336518017, photo=open('user_photo.jpg','rb'))
+    return PHOTO2
+
+def photo2(update: Update, context: CallbackContext):
+    print(update.message.photo[-1]['file_id'])
+    context.user_data['photo2'] = update.message.photo[-1]['file_id']
+    update.message.reply_text(
+        'Второе фото сохранено'
+    )
+    #context.bot.send_message(chat_id=ms_chat_id,
+    #                         text=f'ФИО:{context.user_data["fio_ms"]}\nКатегории:{context.user_data["Categorii"]}\n{context.user_data["Ol"]}')
+    #context.bot.send_photo(chat_id=ms_chat_id,
+                           #photo=context.user_data['photo'])
+    #context.bot.send_photo(chat_id=ms_chat_id, photo=context.user_data['photo2'])
+    list_of_urls = [
+        context.user_data['photo'],
+        context.user_data['photo2'],
+    ]
+    media_group = list()
+    text = f'ФИО:{context.user_data["fio_ms"]}\nКатегории:{context.user_data["Categorii"]}\n{context.user_data["Ol"]}'
+    for number, url in enumerate(list_of_urls):
+        media_group.append(InputMediaPhoto(media=url, caption=text if number == 0 else ''))
+    context.bot.send_media_group(chat_id=ms_chat_id, media=media_group)
+    update.message.reply_text(
+        'Данные отправлены'
+    )
+    return ConversationHandler.END
+
+def ms_end(update: Update, context: CallbackContext):
+    context.bot.send_message(chat_id=ms_chat_id,
+                             text=f'ФИО:{context.user_data["fio_ms"]}\nКатегории:{context.user_data["Categorii"]}\n{context.user_data["Ol"]}')
+    context.bot.send_photo(chat_id=ms_chat_id,
+                           photo='AgACAgIAAxkBAAIDwWLpcBgmgnyIaC7w2laZURD3nrfCAALSvDEbXpZRSxLb865Tayl2AQADAgADeQADKQQ')
+    context.bot.send_photo(chat_id=ms_chat_id, photo=update.message.photo[-1])
+    return ConversationHandler.END
+
+
+
 def unknown(update: Update, context: CallbackContext):
     """Функция для всех других сообщений и команд, которые бот не знает"""
     context.bot.send_message(chat_id=update.effective_chat.id, text="Сори, я не понимаю эту команду")
@@ -297,6 +407,26 @@ def main():
     )
     # Добавляем обработчик разговоров `conv_handler`
     dispatcher.add_handler(change_handler)
+
+    ms_handler = ConversationHandler(
+        entry_points=[CommandHandler(command='ms', callback=ms)],
+        states={
+            FIO_MS: [MessageHandler(Filters.text & ~Filters.command, fio_ms, pass_user_data=True)],
+            CATEGORII: [CallbackQueryHandler(categorii, pattern='^' + 'A' + '$'),
+                        CallbackQueryHandler(categorii, pattern='^' + 'B' + '$'),
+                        CallbackQueryHandler(categorii, pattern='^' + 'AB' + '$')],
+            OL: [CallbackQueryHandler(ol, pattern='^' + 'Yes' + '$'),
+                 CallbackQueryHandler(ol, pattern='^' + 'No' + '$')],
+            PHOTO: [MessageHandler(Filters.photo, photo, pass_user_data=True)],
+            PHOTO2: [MessageHandler(Filters.photo, photo2, pass_user_data=True)],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+    # Добавляем обработчик разговоров `conv_handler`
+    dispatcher.add_handler(ms_handler)
+
+
+
     '''-----------------------------------------------------------------------------------------------------------'''
     check_teoria_handler = CommandHandler('check_teoria', check_teoria)
     dispatcher.add_handler(check_teoria_handler)
