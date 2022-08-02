@@ -23,7 +23,6 @@ from base_bot import (
     check_students_vozdenie,
     change_students,
     checkUser,
-    checkpek,
 )
 from config import TOKEN, ms_chat_id
 
