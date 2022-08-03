@@ -23,6 +23,15 @@ def checkUser(update, context):
     conn.close()
     return state
 
+def user_name(ID, name, surname):
+    conn = sqlite3.connect('database.db', check_same_thread=False)
+    cur = conn.cursor()
+    cur.execute(f'UPDATE users SET Имя = "{name}",Фамилия = "{surname}" WHERE id = {ID} ')
+    conn.commit()
+    conn.close()
+
+
+
 """
 def updateUser(category, text, update):
     # Updates user info as inputted.
@@ -96,16 +105,17 @@ def change_students(table, student_id, data, value):
     где необходимо передать data-какой столбец изменить и value-на что изменить'''
     conn = sqlite3.connect('database.db', check_same_thread=False)
     c = conn.cursor()
-    print(f'UPDATE {table} SET {data} = {value} WHERE student_id = {student_id} ')
     c.execute(f'UPDATE {table} SET {data} = "{value}" WHERE student_id = {student_id} ')
     conn.commit()
     conn.close()
 
-if __name__ == '__main__':
+
+if __name__ != '__main__':
     #add_message(1234,'Roma','Rom',MESSAGE='legend my 1')
-    check_students_teoria(336518017)
-    add_teoria(111,'Болотов','Гусёк Царёк', '007')
-    add_vozdenie(111,'Болотов','Гусёк Царёк', '007')
-    change_students(1, 'Uchenik', 'Нов Чувак')
+    #check_students_teoria(336518017)
+    #add_teoria(111,'Болотов','Гусёк Царёк', '007')
+    #add_vozdenie(111,'Болотов','Гусёк Царёк', '007')
+    change_students('vozdenie', 1, 'Uchenik', 'Нов Чувак')
+
 
 
