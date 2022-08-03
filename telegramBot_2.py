@@ -22,7 +22,8 @@ from base_bot import (
     check_students_vozdenie,
     change_students,
     checkUser,
-    user_name
+    user_name,
+    instructor_surname
 )
 from config import TOKEN, ms_chat_id
 
@@ -32,7 +33,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-Instructor, Uchenik, Grupa = range(3)
+Uchenik, Grupa = range(2)
 REG, REG2 = range(2)
 FIO, NUMBER = range(2)
 teoria,vozdenie = 'teoria', 'vozdenie'
@@ -59,13 +60,13 @@ def reg_user(update, context):
         return ConversationHandler.END
 
 def reg_user_surname(update, context):
-    context.user_data['user_surname'] = update.message.text
+    context.user_data['Фамилия'] = update.message.text
     update.message.reply_text('Теперь введите своё имя: ')
     return REG2
 
 def reg_user_name(update, context):
-    context.user_data['user_name'] = update.message.text
-    user_name(ID=update.effective_chat.id, name=context.user_data['user_name'], surname=context.user_data['user_surname'])
+    context.user_data['Имя'] = update.message.text
+    user_name(ID=update.effective_chat.id, name=context.user_data['Имя'], surname=context.user_data['Фамилия'])
     update.message.reply_text("Теперь я знаю кто ты:"
                               "{}\n".format(facts_to_str(context)))
     return ConversationHandler.END
@@ -81,20 +82,11 @@ def facts_to_str(context):
 
 '''--------------------------------Функции для подачи ученика в список----------------------------------------------'''
 
-def podacha(update: Update, _):
-    """Функция для начала подачи ученика на теорию или вождение,
-    которая запрашивает фамилию инструктора и отправляет на следующий шаг(фамилию и имя ученика)"""
-    update.message.reply_text('Если хотите отменить подачу введите команду /cancel. \n\n'
-                              'Введите свою фамилию: ')
-    return Instructor
-
-
-def instructor(update: Update, context: CallbackContext):
+def podacha(update: Update, context: CallbackContext):
     """Функция принимает введённую пользователем фамилию инструктора, сохраняет значение по ключу,
     выводит в логах и запрашивает фамилию и имя ученика, отправляет на след. шаг"""
-    user = update.message.from_user
-    context.user_data[Instructor] = update.message.text
-    logger.info("Фамилия инструктора(%s): %s", user.first_name, update.message.text)
+    instructor_surname(update,context)
+    logger.info("Фамилия инструктора: %s", context.user_data['Фамилия'])
     update.message.reply_text('Теперь введите Фамилию и Имя ученика: ')
     return Uchenik
 
@@ -115,11 +107,11 @@ def grupa_teoria(update, context: CallbackContext):
     добавляет данные в базу и выводит ответное сообщение пользователю """
     logger.info("Группа ученика: %s", update.message.text)
     context.user_data[Grupa] = update.message.text
-    add_teoria(id=update.message.chat['id'], Instructor=context.user_data[Instructor],
+    add_teoria(id=update.message.chat['id'], Instructor=context.user_data['Фамилия'],
                Uchenik=context.user_data[Uchenik], Grupa=context.user_data[Grupa])
     update.message.reply_text(f'''
     Ученик добавлен в список на теорию!\n  
-    Вы: {context.user_data[Instructor]}
+    Вы: {context.user_data['Фамилия']}
     Ученик: {context.user_data[Uchenik]}
     Группа: {context.user_data[Grupa]} 
     ''')
@@ -133,11 +125,11 @@ def grupa_vozdenie(update, context: CallbackContext):
     добавляет данные в базу и выводит ответное сообщение пользователю """
     logger.info("Группа ученика: %s", update.message.text)
     context.user_data[Grupa] = update.message.text
-    add_vozdenie(id=update.message.chat['id'], Instructor=context.user_data[Instructor],
+    add_vozdenie(id=update.message.chat['id'], Instructor=context.user_data['Фамилия'],
                  Uchenik=context.user_data[Uchenik], Grupa=context.user_data[Grupa])
     update.message.reply_text(f'''
     Ученик добавлен в список на вождение!\n  
-    Вы: {context.user_data[Instructor]}
+    Вы: {context.user_data['Фамилия']}
     Ученик: {context.user_data[Uchenik]}
     Группа: {context.user_data[Grupa]} 
     ''')
@@ -375,7 +367,6 @@ def main():
         entry_points=[CommandHandler('teoria', podacha)],
         # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
-            Instructor: [MessageHandler(Filters.text & ~Filters.command, instructor, pass_user_data=True)],
             Uchenik: [MessageHandler(Filters.text & ~Filters.command, uchenik, pass_user_data=True)],
             Grupa: [MessageHandler(Filters.text & ~Filters.command, grupa_teoria, pass_user_data=True)],
         },
@@ -390,7 +381,6 @@ def main():
         entry_points=[CommandHandler('vozdenie', podacha)],
         # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
-            Instructor: [MessageHandler(Filters.text & ~Filters.command, instructor, pass_user_data=True)],
             Uchenik: [MessageHandler(Filters.text & ~Filters.command, uchenik, pass_user_data=True)],
             Grupa: [MessageHandler(Filters.text & ~Filters.command, grupa_vozdenie, pass_user_data=True)],
         },
