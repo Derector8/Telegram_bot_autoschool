@@ -22,6 +22,7 @@ from base_bot import (
     check_students_vozdenie,
     change_students,
     checkUser,
+    user_name
 )
 from config import TOKEN, ms_chat_id
 
@@ -32,6 +33,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 Instructor, Uchenik, Grupa = range(3)
+REG, REG2 = range(2)
 FIO, NUMBER = range(2)
 teoria,vozdenie = 'teoria', 'vozdenie'
 CHANGE, NOMER_UCHENIKA, WHAT, FIO_ADD, NUMBER_ADD = range(5)
@@ -47,9 +49,26 @@ def start(update: Update, context: CallbackContext):
 
 
 def reg_user(update, context):
-    update.message.reply_text(checkUser(update, context))
-    update.message.reply_text("Я знаю кто ты:"
+    if checkUser(update, context) == 'Новый пользователь':
+        update.message.reply_text('Введите свою фамилию: ')
+        return REG
+    else:
+        update.message.reply_text(checkUser(update, context))
+        update.message.reply_text("Я знаю кто ты:"
+                                  "{}\n".format(facts_to_str(context)))
+        return ConversationHandler.END
+
+def reg_user_surname(update, context):
+    context.user_data['user_surname'] = update.message.text
+    update.message.reply_text('Теперь введите своё имя: ')
+    return REG2
+
+def reg_user_name(update, context):
+    context.user_data['user_name'] = update.message.text
+    user_name(ID=update.effective_chat.id, name=context.user_data['user_name'], surname=context.user_data['user_surname'])
+    update.message.reply_text("Теперь я знаю кто ты:"
                               "{}\n".format(facts_to_str(context)))
+    return ConversationHandler.END
 
 
 def facts_to_str(context):
@@ -339,6 +358,17 @@ def main():
     '''-----------------------------------------------------------------------------------------------------------'''
     start_handler = CommandHandler('start', start)
     dispatcher.add_handler(start_handler)
+
+    reg_user_handler = ConversationHandler(
+        entry_points=[CommandHandler('reg', reg_user)],
+        states={
+            REG: [MessageHandler(Filters.text & ~Filters.command, reg_user_surname, pass_user_data=True)],
+            REG2: [MessageHandler(Filters.text & ~Filters.command, reg_user_name, pass_user_data=True)],
+        },
+        # точка выхода из разговора
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+    dispatcher.add_handler(reg_user_handler)
     '''-----------------------------------------------------------------------------------------------------------'''
     teoria_handler = ConversationHandler(  # здесь строится логика разговора
         # точка входа в разговор
@@ -402,8 +432,6 @@ def main():
     # Добавляем обработчик разговоров `conv_handler`
     dispatcher.add_handler(ms_handler)
 
-
-
     '''-----------------------------------------------------------------------------------------------------------'''
     check_teoria_handler = CommandHandler('check_teoria', check_teoria)
     dispatcher.add_handler(check_teoria_handler)
@@ -411,9 +439,6 @@ def main():
     check_vozdenie_handler = CommandHandler('check_vozdenie', check_vozdenie)
     dispatcher.add_handler(check_vozdenie_handler)
     '''-----------------------------------------------------------------------------------------------------------'''
-    reg_user_handler = CommandHandler('reg', reg_user)
-    dispatcher.add_handler(reg_user_handler)
-
     unknown_handler = MessageHandler(Filters.text & (~Filters.command), unknown)
     dispatcher.add_handler(unknown_handler)
     '''-----------------------------------------------------------------------------------------------------------'''
