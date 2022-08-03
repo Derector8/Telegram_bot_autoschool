@@ -30,6 +30,14 @@ def user_name(ID, name, surname):
     conn.commit()
     conn.close()
 
+def instructor_surname(update,context):
+    conn = sqlite3.connect('database.db', check_same_thread=False)
+    cur = conn.cursor()
+    c = cur.execute('''SELECT Фамилия FROM users WHERE id = ?''', (update.message.from_user.id,)).fetchone()
+    context.user_data['Фамилия'] = c[0]
+    conn.commit()
+    conn.close()
+
 
 
 """
