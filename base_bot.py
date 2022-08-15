@@ -2,9 +2,7 @@
 import sqlite3
 
 def checkUser(update, context):
-    # Checks if user has visited the bot before
-    # If yes, load data of user
-    # If no, then create a new entry in database
+'''Проверяет есть ли пользователь в базе. Если есть - пишет кто он, если нет - создаёт запись в базе'''
     conn = sqlite3.connect('database.db', check_same_thread=False)
     cur = conn.cursor()
     conn.text_factory = str
@@ -16,7 +14,7 @@ def checkUser(update, context):
         context.user_data['Фамилия']=c[0]
         state = 'Зарегистрированный пользователь'
     else:
-        cur.execute('''INSERT OR IGNORE INTO users (id, firstname) VALUES (?, ?)''', \
+        cur.execute('''INSERT OR IGNORE INTO users (id, firstname) VALUES (?, ?)''',
         (update.message.from_user.id, update.message.from_user.first_name,))
         state = 'Новый пользователь'
     conn.commit()
@@ -38,27 +36,6 @@ def instructor_surname(update,context):
     conn.commit()
     conn.close()
 
-
-
-"""
-def updateUser(category, text, update):
-    # Updates user info as inputted.
-    conn = sqlite3.connect('database.db', check_same_thread=False)
-    cur = conn.cursor()
-    # Update SQLite database as needed.
-    cur.execute('''UPDATE OR IGNORE userdata SET {} = ? WHERE id = ?'''.format(category), \
-        (text, update.message.from_user.id,))
-    conn.commit()
-    conn.close()
-"""
-#def add_message(ID: int, USERNAME: str = None, FIRST_NAME: str = None, LAST_NAME: str = None, MESSAGE: str = None, GROUPA = None):
-#    '''Добавляет ученика в базу данных в поля ID,Имя, Фамилия, Ник, Имя ученика, группа'''
-#    conn = sqlite3.connect('database.db', check_same_thread=False)
-#    c = conn.cursor()
-#    c.execute('INSERT INTO base (GROUPA,MESSAGE,LAST_NAME,FIRST_NAME,USERNAME,ID) VALUES (?, ?, ?, ?, ?, ?)',
-#              (GROUPA,MESSAGE,LAST_NAME,FIRST_NAME,USERNAME,ID))
-#    conn.commit()
-#    conn.close()
 
 def add_teoria(id: int, Instructor: str = None, Uchenik: str = None, Grupa: str = None):
     '''Добавляет ученика в базу данных teoria'''
@@ -89,7 +66,6 @@ def check_students_teoria(ID):
     for one in students:
         stroka += str(count) + ') Инструктор: ' + str(one[0])+ '\nУченик: ' + str(one[1])+ '\nГруппа: ' + str(one[2]) + '\nНомер в списке:' + str(one[3]) + '\n\n'
         count += 1
-    print(stroka)
     conn.close()
     return stroka
 

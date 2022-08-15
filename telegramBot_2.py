@@ -39,7 +39,7 @@ FIO, NUMBER = range(2)
 teoria,vozdenie = 'teoria', 'vozdenie'
 CHANGE, NOMER_UCHENIKA, WHAT, FIO_ADD, NUMBER_ADD = range(5)
 FIO_MS, CATEGORII, OL, PHOTO, PHOTO2 = range(5)
-
+slovar_dlya_nazvania_spiska = {'teoria':'теорию', 'vozdenie':'вождение'}
 
 # Команды и функции бота
 
@@ -232,7 +232,7 @@ def fio_to_base(update, context: CallbackContext):
     change_students(table=context.user_data['Spisok'],student_id=context.user_data['NOMER_UCHENIKA'],
                     data='Uchenik', value=context.user_data[Uchenik])
     update.message.reply_text(
-        f'Ученик {context.user_data[Uchenik]} исправлен в списке на вождение '
+        f"Ученик {context.user_data[Uchenik]} исправлен в списке на {slovar_dlya_nazvania_spiska[context.user_data['Spisok']]} "
         f'под номером {context.user_data["NOMER_UCHENIKA"]}!')
     return ConversationHandler.END
 
@@ -243,7 +243,7 @@ def number_to_base(update, context: CallbackContext):
     context.user_data[Grupa] = update.message.text
     change_students(table=context.user_data['Spisok'], student_id=context.user_data['NOMER_UCHENIKA'], data='Grupa', value=context.user_data[Grupa])
     update.message.reply_text(
-        f'Номер группы исправлен в списке на вождение под номером {context.user_data["NOMER_UCHENIKA"]}!')
+        f'Номер группы исправлен в списке на {slovar_dlya_nazvania_spiska[context.user_data["Spisok"]]} под номером {context.user_data["NOMER_UCHENIKA"]}!')
     return ConversationHandler.END
 
 
