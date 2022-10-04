@@ -357,23 +357,18 @@ def main():
             REG: [MessageHandler(Filters.text & ~Filters.command, reg_user_surname, pass_user_data=True)],
             REG2: [MessageHandler(Filters.text & ~Filters.command, reg_user_name, pass_user_data=True)],
         },
-        # точка выхода из разговора
         fallbacks=[CommandHandler('cancel', cancel)],
     )
     dispatcher.add_handler(reg_user_handler)
     '''-----------------------------------------------------------------------------------------------------------'''
-    teoria_handler = ConversationHandler(  # здесь строится логика разговора
-        # точка входа в разговор
+    teoria_handler = ConversationHandler(
         entry_points=[CommandHandler('teoria', podacha)],
-        # этапы разговора, каждый со своим списком обработчиков сообщений
         states={
             Uchenik: [MessageHandler(Filters.text & ~Filters.command, uchenik, pass_user_data=True)],
             Grupa: [MessageHandler(Filters.text & ~Filters.command, grupa_teoria, pass_user_data=True)],
         },
-        # точка выхода из разговора
         fallbacks=[CommandHandler('cancel', cancel)],
     )
-    # Добавляем обработчик разговоров `conv_handler`
     dispatcher.add_handler(teoria_handler)
     '''-----------------------------------------------------------------------------------------------------------'''
     vozdenie_handler = ConversationHandler(  # здесь строится логика разговора
@@ -419,7 +414,6 @@ def main():
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
-    # Добавляем обработчик разговоров `conv_handler`
     dispatcher.add_handler(ms_handler)
 
     '''-----------------------------------------------------------------------------------------------------------'''

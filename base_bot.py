@@ -2,7 +2,7 @@
 import sqlite3
 
 def checkUser(update, context):
-'''Проверяет есть ли пользователь в базе. Если есть - пишет кто он, если нет - создаёт запись в базе'''
+    'Проверяет есть ли пользователь в базе. Если есть - пишет кто он, если нет - создаёт запись в базе'
     conn = sqlite3.connect('database.db', check_same_thread=False)
     cur = conn.cursor()
     conn.text_factory = str
@@ -94,12 +94,16 @@ def change_students(table, student_id, data, value):
     conn.close()
 
 
-if __name__ != '__main__':
-    #add_message(1234,'Roma','Rom',MESSAGE='legend my 1')
-    #check_students_teoria(336518017)
-    #add_teoria(111,'Болотов','Гусёк Царёк', '007')
-    #add_vozdenie(111,'Болотов','Гусёк Царёк', '007')
-    change_students('vozdenie', 1, 'Uchenik', 'Нов Чувак')
 
+if __name__ == '__main__':
+    check_students_teoria(336518017)
+    print("Проверка списков завершена")
+    add_teoria(111,'Болотов','Гусёк Царёк', 'тест007')
+    print('Добавление на теорию успешно')
+    add_vozdenie(111,'Болотов','Гусёк Царёк', 'тест007')
+    print('Добавление на вождение успешно')
+    change_students('vozdenie', 1, 'Uchenik', 'Нов Чувак')
+    print('Замена совершена успешно')
+    print('Всё работает!')
 
 
