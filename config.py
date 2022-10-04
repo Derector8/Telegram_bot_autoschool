@@ -1,4 +1,4 @@
-TOKEN = '5236711628:AAFY9606YDlTuFuKauwddASw4uQ5BnWDgyE'
+TOKEN = ''
 
 otchet_chat_id = -722282295
 
