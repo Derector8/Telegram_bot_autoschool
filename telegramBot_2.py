@@ -21,7 +21,7 @@ from base_bot import (
     check_students_teoria,
     check_students_vozdenie,
     change_students,
-    checkUser,
+    check_user,
     user_name,
     instructor_surname
 )
@@ -50,11 +50,11 @@ def start(update: Update, context: CallbackContext):
 
 
 def reg_user(update, context):
-    if checkUser(update, context) == 'Новый пользователь':
+    if check_user(update, context) == 'Новый пользователь':
         update.message.reply_text('Введите свою фамилию: ')
         return REG
     else:
-        update.message.reply_text(checkUser(update, context))
+        update.message.reply_text(check_user(update, context))
         update.message.reply_text("Я знаю кто ты:"
                                   "{}\n".format(facts_to_str(context)))
         return ConversationHandler.END
